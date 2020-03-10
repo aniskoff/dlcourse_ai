@@ -25,7 +25,7 @@ class Trainer:
 
     def __init__(self, model, dataset, optim,
                  num_epochs=20,
-                 batch_size=20,
+                 batch_size=20,  # TODO was 20
                  learning_rate=1e-2,
                  learning_rate_decay=1.0):
         """
@@ -88,6 +88,7 @@ class Trainer:
         val_acc_history = []
         
         for epoch in range(self.num_epochs):
+
             shuffled_indices = np.arange(num_train)
             np.random.shuffle(shuffled_indices)
             sections = np.arange(self.batch_size, num_train, self.batch_size)
@@ -100,17 +101,33 @@ class Trainer:
                 # use model to generate loss and gradients for all
                 # the params
 
-                raise Exception("Not implemented!")
+                # raise Exception("Not implemented!")
+
+                loss = self.model.compute_loss_and_gradients(self.dataset.train_X[batch_indices],
+                                                             self.dataset.train_y[batch_indices])
 
                 for param_name, param in self.model.params().items():
                     optimizer = self.optimizers[param_name]
                     param.value = optimizer.update(param.value, param.grad, self.learning_rate)
 
+
+                #
+                # W1_before_optimize = deepcopy(self.model.hidden_layer.W.value)
+                # optimizer = self.optimizers['W1']
+                # param = self.model.params()['W1']
+                # param.value = optimizer.update(param.value, param.grad, self.learning_rate)
+                # W1_after_optimize = deepcopy(self.model.hidden_layer.W.value)
+                # assert not np.allclose(W1_before_optimize, W1_after_optimize), 'optimization doesnt affect real W1'
+                #
+
+
+
+
                 batch_losses.append(loss)
 
             if np.not_equal(self.learning_rate_decay, 1.0):
                 # TODO: Implement learning rate decay
-                raise Exception("Not implemented!")
+                self.learning_rate *= self.learning_rate_decay
 
             ave_loss = np.mean(batch_losses)
 
